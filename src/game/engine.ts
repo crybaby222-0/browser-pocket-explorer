@@ -140,6 +140,7 @@ export class Game {
 
     this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 600);
     this.scene.fog = new THREE.Fog(0xbfeaff, 90, 260);
+    this.scene.background = new THREE.Color(0xa8e6ff);
 
     this.input = new InputManager(
       this.renderer.domElement,
