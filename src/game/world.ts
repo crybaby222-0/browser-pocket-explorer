@@ -411,7 +411,7 @@ export function buildWorld(scene: THREE.Scene): WorldRefs {
 
 /** Céu com gradiente suave (domo invertido) */
 export function buildSky(scene: THREE.Scene): THREE.Mesh {
-  const geo = new THREE.SphereGeometry(WORLD_SIZE * 1.1, 24, 16);
+  const geo = new THREE.SphereGeometry(140, 24, 16);
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,
@@ -431,6 +431,8 @@ export function buildSky(scene: THREE.Scene): THREE.Mesh {
       }`,
   });
   const sky = new THREE.Mesh(geo, mat);
+  sky.frustumCulled = false;
+  sky.renderOrder = -10;
   scene.add(sky);
   return sky;
 }

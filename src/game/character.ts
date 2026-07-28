@@ -90,10 +90,10 @@ export function createCharacter(opts: CharacterOptions = {}): CharacterParts {
   const skull = new THREE.Mesh(sphere, toon(skin));
   skull.scale.setScalar(0.46);
   skull.castShadow = true;
-  head.add(withOutline(skull, 1.05));
+  head.add(withOutline(skull, 1.03));
 
   const hairMesh = new THREE.Mesh(sphere, toon(hair));
-  hairMesh.scale.set(0.49, 0.42, 0.49);
+  hairMesh.scale.set(0.478, 0.43, 0.478);
   hairMesh.position.y = 0.12;
   head.add(hairMesh);
 

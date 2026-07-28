@@ -76,6 +76,7 @@ export class Game {
   private world!: WorldRefs;
   private colliders: Collider[] = [];
   private sun!: THREE.DirectionalLight;
+  private sky!: THREE.Mesh;
 
   // Jogador
   private player = createCharacter({ shirt: "#ff5f7e", pants: "#4b7bec", hair: "#5b3a29", skin: "#ffd7b0" });
@@ -157,7 +158,7 @@ export class Game {
 
   /* ------------------------- Construção ------------------------- */
   private buildScene() {
-    buildSky(this.scene);
+    this.sky = buildSky(this.scene);
     const terrain = buildTerrain(200);
     this.scene.add(terrain);
     this.world = buildWorld(this.scene);
@@ -536,6 +537,7 @@ export class Game {
 
     // Luz acompanha o jogador para sombras nítidas
     this.sun.position.set(this.pos.x + 45, this.pos.y + 80, this.pos.z + 28);
+    this.sky.position.copy(this.camera.position);
     this.sun.target.position.copy(this.pos);
 
     this.renderer.render(this.scene, this.camera);
@@ -823,7 +825,7 @@ export class Game {
     const dpr = s.qualidade === "baixa" ? 0.7 : s.qualidade === "media" ? 1 : Math.min(devicePixelRatio, 2);
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2) * (s.qualidade === "alta" ? 1 : dpr / Math.min(devicePixelRatio, 2)));
     this.renderer.setPixelRatio(s.qualidade === "alta" ? Math.min(devicePixelRatio, 2) : s.qualidade === "media" ? 1 : 0.7);
-    this.camera.far = s.distancia * 2.4;
+    this.camera.far = Math.max(300, s.distancia * 2.4);
     this.camera.updateProjectionMatrix();
     (this.scene.fog as THREE.Fog).far = s.distancia * 2;
     (this.scene.fog as THREE.Fog).near = s.distancia * 0.55;
