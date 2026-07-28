@@ -5,6 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * LITE - Design system do jogo portátil.
+ * Paleta extremamente vibrante inspirada em RPGs de console portátil.
+ */
+@theme {
+  --font-display: "Baloo 2", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+}
+
+
+/*
  * Design system definition.
  *
  * The @theme inline block maps CSS custom properties to Tailwind utility
@@ -62,40 +72,41 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --radius: 1rem;
+  --background: oklch(0.97 0.03 220);
+  --foreground: oklch(0.28 0.07 285);
+  --card: oklch(0.99 0.015 95);
+  --card-foreground: oklch(0.28 0.07 285);
+  --popover: oklch(0.99 0.015 95);
+  --popover-foreground: oklch(0.28 0.07 285);
+  --primary: oklch(0.7 0.19 20);
+  --primary-foreground: oklch(0.99 0.01 95);
+  --secondary: oklch(0.83 0.16 200);
+  --secondary-foreground: oklch(0.26 0.07 285);
+  --muted: oklch(0.93 0.03 250);
+  --muted-foreground: oklch(0.5 0.06 285);
+  --accent: oklch(0.88 0.17 95);
+  --accent-foreground: oklch(0.28 0.08 285);
+  --destructive: oklch(0.62 0.24 25);
+  --destructive-foreground: oklch(0.99 0.01 95);
+  --border: oklch(0.42 0.09 288);
+  --input: oklch(0.9 0.03 250);
+  --ring: oklch(0.75 0.18 40);
+  --chart-1: oklch(0.7 0.19 20);
+  --chart-2: oklch(0.8 0.16 190);
+  --chart-3: oklch(0.85 0.17 95);
+  --chart-4: oklch(0.72 0.19 145);
+  --chart-5: oklch(0.68 0.2 320);
+  --sidebar: oklch(0.99 0.015 95);
+  --sidebar-foreground: oklch(0.28 0.07 285);
+  --sidebar-primary: oklch(0.7 0.19 20);
+  --sidebar-primary-foreground: oklch(0.99 0.01 95);
+  --sidebar-accent: oklch(0.88 0.17 95);
+  --sidebar-accent-foreground: oklch(0.28 0.08 285);
+  --sidebar-border: oklch(0.42 0.09 288);
+  --sidebar-ring: oklch(0.75 0.18 40);
 }
+
 
 .dark {
   --background: oklch(0.129 0.042 264.695);
@@ -141,4 +152,103 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+/* ---------------- Tokens específicos do jogo LITE ---------------- */
+:root {
+  --hud: oklch(0.3 0.08 288 / 0.72);
+  --hud-foreground: oklch(0.99 0.01 95);
+  --hud-border: oklch(0.99 0.01 95 / 0.35);
+  --vida: oklch(0.68 0.22 22);
+  --energia: oklch(0.82 0.18 145);
+  --moeda: oklch(0.86 0.17 88);
+  --magia: oklch(0.72 0.19 300);
+  --agua: oklch(0.78 0.15 220);
+  --gradient-ceu: linear-gradient(180deg, oklch(0.82 0.13 230), oklch(0.93 0.09 200) 55%, oklch(0.95 0.09 90));
+  --gradient-botao: linear-gradient(180deg, oklch(0.78 0.19 30), oklch(0.64 0.2 18));
+  --gradient-hud: linear-gradient(180deg, oklch(0.34 0.09 288 / 0.82), oklch(0.24 0.08 290 / 0.86));
+  --sombra-hud: 0 10px 26px -12px oklch(0.2 0.08 290 / 0.7);
+  --sombra-pop: 0 18px 44px -16px oklch(0.2 0.08 290 / 0.65);
+}
+
+@theme inline {
+  --color-hud: var(--hud);
+  --color-hud-foreground: var(--hud-foreground);
+  --color-hud-border: var(--hud-border);
+  --color-vida: var(--vida);
+  --color-energia: var(--energia);
+  --color-moeda: var(--moeda);
+  --color-magia: var(--magia);
+  --color-agua: var(--agua);
+}
+
+@utility painel-hud {
+  background: var(--gradient-hud);
+  border: 2px solid var(--hud-border);
+  color: var(--hud-foreground);
+  box-shadow: var(--sombra-hud);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+}
+
+@utility painel-pop {
+  background: var(--gradient-hud);
+  border: 2px solid var(--hud-border);
+  color: var(--hud-foreground);
+  box-shadow: var(--sombra-pop);
+  backdrop-filter: blur(16px);
+  border-radius: calc(var(--radius) + 8px);
+}
+
+@utility botao-toque {
+  background: oklch(0.99 0.01 95 / 0.16);
+  border: 2px solid oklch(0.99 0.01 95 / 0.4);
+  color: var(--hud-foreground);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.09s ease,
+    background 0.14s ease;
+  touch-action: none;
+  user-select: none;
+}
+
+@utility botao-toque-ativo {
+  transform: scale(0.88);
+  background: oklch(0.99 0.01 95 / 0.4);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    font-family: var(--font-body);
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,
+  h2,
+  h3,
+  .fonte-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@keyframes pulso-lite {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+
+@utility pulso {
+  animation: pulso-lite 1.6s ease-in-out infinite;
 }
