@@ -77,14 +77,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "LITE — Jogo de Mundo Aberto 3D no Navegador" },
+      { name: "description", content: "LITE é um jogo de mundo aberto 3D em HTML5 e WebGL: explore florestas, vilas, lagos e cavernas, faça missões, crie itens e enfrente chefes." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "LITE — Jogo de Mundo Aberto 3D no Navegador" },
+      { property: "og:description", content: "LITE é um jogo de mundo aberto 3D em HTML5 e WebGL: explore florestas, vilas, lagos e cavernas, faça missões, crie itens e enfrente chefes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "LITE — Jogo de Mundo Aberto 3D no Navegador" },
+      { name: "twitter:description", content: "LITE é um jogo de mundo aberto 3D em HTML5 e WebGL: explore florestas, vilas, lagos e cavernas, faça missões, crie itens e enfrente chefes." },
     ],
     links: [
       {

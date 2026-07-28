@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "LITE — Jogo de Mundo Aberto 3D no Navegador" },
       {
         property: "og:description",
-        content: "Explore um mundo contínuo e colorido direto do navegador, no celular ou no desktop.",
+        content: "LITE é um jogo de mundo aberto 3D em HTML5 e WebGL: explore florestas, vilas, lagos e cavernas, faça missões, crie itens e enfrente chefes.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
