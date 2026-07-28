@@ -5,6 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * LITE - Design system do jogo portátil.
+ * Paleta extremamente vibrante inspirada em RPGs de console portátil.
+ */
+@theme {
+  --font-display: "Baloo 2", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+}
+
+
+/*
  * Design system definition.
  *
  * The @theme inline block maps CSS custom properties to Tailwind utility
