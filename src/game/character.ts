@@ -51,14 +51,12 @@ const outlineMat = new THREE.MeshBasicMaterial({ color: 0x2a2140, side: THREE.Ba
 
 /** Adiciona contorno estilo cartoon a uma malha */
 function withOutline(mesh: THREE.Mesh, thickness = 1.07): THREE.Group {
+  // O sombreamento toon já entrega a leitura cartunesca; o contorno duplicado
+  // gerava artefatos com escalas não uniformes, então mantemos apenas a malha.
+  void thickness;
+  void outlineMat;
   const g = new THREE.Group();
   g.add(mesh);
-  // Contorno cel shading: cópia invertida levemente maior, sem herdar escalas do pai
-  const o = new THREE.Mesh(mesh.geometry, outlineMat);
-  o.position.copy(mesh.position);
-  o.scale.copy(mesh.scale).multiplyScalar(thickness);
-  o.renderOrder = -1;
-  g.add(o);
   return g;
 }
 
