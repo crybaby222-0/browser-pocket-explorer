@@ -153,3 +153,102 @@
     color: var(--color-foreground);
   }
 }
+
+/* ---------------- Tokens específicos do jogo LITE ---------------- */
+:root {
+  --hud: oklch(0.3 0.08 288 / 0.72);
+  --hud-foreground: oklch(0.99 0.01 95);
+  --hud-border: oklch(0.99 0.01 95 / 0.35);
+  --vida: oklch(0.68 0.22 22);
+  --energia: oklch(0.82 0.18 145);
+  --moeda: oklch(0.86 0.17 88);
+  --magia: oklch(0.72 0.19 300);
+  --agua: oklch(0.78 0.15 220);
+  --gradient-ceu: linear-gradient(180deg, oklch(0.82 0.13 230), oklch(0.93 0.09 200) 55%, oklch(0.95 0.09 90));
+  --gradient-botao: linear-gradient(180deg, oklch(0.78 0.19 30), oklch(0.64 0.2 18));
+  --gradient-hud: linear-gradient(180deg, oklch(0.34 0.09 288 / 0.82), oklch(0.24 0.08 290 / 0.86));
+  --sombra-hud: 0 10px 26px -12px oklch(0.2 0.08 290 / 0.7);
+  --sombra-pop: 0 18px 44px -16px oklch(0.2 0.08 290 / 0.65);
+}
+
+@theme inline {
+  --color-hud: var(--hud);
+  --color-hud-foreground: var(--hud-foreground);
+  --color-hud-border: var(--hud-border);
+  --color-vida: var(--vida);
+  --color-energia: var(--energia);
+  --color-moeda: var(--moeda);
+  --color-magia: var(--magia);
+  --color-agua: var(--agua);
+}
+
+@utility painel-hud {
+  background: var(--gradient-hud);
+  border: 2px solid var(--hud-border);
+  color: var(--hud-foreground);
+  box-shadow: var(--sombra-hud);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+}
+
+@utility painel-pop {
+  background: var(--gradient-hud);
+  border: 2px solid var(--hud-border);
+  color: var(--hud-foreground);
+  box-shadow: var(--sombra-pop);
+  backdrop-filter: blur(16px);
+  border-radius: calc(var(--radius) + 8px);
+}
+
+@utility botao-toque {
+  background: oklch(0.99 0.01 95 / 0.16);
+  border: 2px solid oklch(0.99 0.01 95 / 0.4);
+  color: var(--hud-foreground);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.09s ease,
+    background 0.14s ease;
+  touch-action: none;
+  user-select: none;
+}
+
+@utility botao-toque-ativo {
+  transform: scale(0.88);
+  background: oklch(0.99 0.01 95 / 0.4);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    font-family: var(--font-body);
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,
+  h2,
+  h3,
+  .fonte-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@keyframes pulso-lite {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+
+@utility pulso {
+  animation: pulso-lite 1.6s ease-in-out infinite;
+}
