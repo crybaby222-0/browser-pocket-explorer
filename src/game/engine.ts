@@ -103,9 +103,13 @@ export class Game {
   private colliders: Collider[] = [];
   private sun!: THREE.DirectionalLight;
   private sky!: THREE.Mesh;
+  private fogPadrao: THREE.Fog;
+  aparencia: Aparencia;
+  hotbarSel = 0;
+  private remotos = new Map<string, Remoto>();
 
   // Jogador
-  private player = createCharacter({ shirt: "#ff5f7e", pants: "#4b7bec", hair: "#5b3a29", skin: "#ffd7b0" });
+  private player: CharacterParts;
   private pos = new THREE.Vector3(6, 0, -4);
   private vel = new THREE.Vector3();
   private noChao = true;
@@ -200,7 +204,7 @@ export class Game {
   /* --------------------- Aparência / texturas -------------------- */
   aplicarAparencia(ap: Aparencia) {
     this.aparencia = ap;
-    aplicarAparencia(ap, this.scene, this.renderer, this.fogPadrao);
+    aplicarAparenciaCena(ap, this.scene, this.renderer, this.fogPadrao);
   }
 
   /** Seleciona um slot da hotbar (estilo Minecraft) */
