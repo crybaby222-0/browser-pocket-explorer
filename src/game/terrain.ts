@@ -9,9 +9,21 @@ import * as THREE from "three";
 export const WORLD_SIZE = 320; // mundo quadrado de 320x320 unidades
 export const WATER_LEVEL = 1.2;
 
+/** Configuração do mundo atual (semente e relevo), definida pelo menu de mundos */
+export interface WorldConfig {
+  seed: number;
+  montanhas: number;
+  floresta: number;
+  agua: number;
+}
+export const WORLD_CFG: WorldConfig = { seed: 1337, montanhas: 1, floresta: 1, agua: 0 };
+export function setWorldConfig(c: Partial<WorldConfig>) {
+  Object.assign(WORLD_CFG, c);
+}
+
 /** Hash determinístico 2D -> [0,1) */
 function hash(x: number, y: number): number {
-  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+  const n = Math.sin(x * 127.1 + y * 311.7 + WORLD_CFG.seed * 0.013) * 43758.5453123;
   return n - Math.floor(n);
 }
 
