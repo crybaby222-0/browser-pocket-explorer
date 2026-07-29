@@ -1,5 +1,5 @@
 /** Barra rápida estilo Minecraft (9 slots) sincronizada com a mochila. */
-import { itemIcon } from "./icons";
+import { iconFor } from "./icons";
 import { ITENS } from "@/game/data";
 import type { Slot } from "@/game/engine";
 
@@ -15,7 +15,7 @@ export function Hotbar({ slots, sel, onSelecionar, onUsar }: Props) {
     <div className="pointer-events-auto absolute bottom-20 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-xl border-2 border-hud-border bg-hud-foreground/10 p-1 backdrop-blur-md sm:bottom-16">
       {slots.slice(0, 9).map((s, i) => {
         const def = s.id ? ITENS[s.id] : null;
-        const Icon = s.id ? itemIcon(s.id) : null;
+        const Icon = def ? iconFor(def.icone) : null;
         return (
           <button
             key={i}
@@ -25,7 +25,7 @@ export function Hotbar({ slots, sel, onSelecionar, onUsar }: Props) {
               sel === i ? "border-hud-foreground bg-hud-foreground/30" : "border-hud-border bg-hud-foreground/10"
             }`}
           >
-            {Icon && <Icon className="size-5" style={{ color: def?.cor }} />}
+            {Icon && <Icon className="size-5" />}
             {s.qtd > 1 && (
               <span className="absolute bottom-0 right-0.5 text-[10px] font-black">{s.qtd}</span>
             )}
