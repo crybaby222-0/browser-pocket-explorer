@@ -30,7 +30,7 @@ export function TouchControls({ onMove, onButton, onRun, onLook }: Props) {
         dy = (dy / d) * raio;
       }
       setKnob({ x: dx, y: dy });
-      onMove(dx / raio, -dy / raio);
+      onMove(-dx / raio, dy / raio);
     };
 
     const start = (e: TouchEvent) => {
