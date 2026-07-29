@@ -3,7 +3,7 @@
  * missões, inventário, save automático e ponte reativa com a interface.
  */
 import * as THREE from "three";
-import { AnimState, animateCharacter, createCharacter, toon } from "./character";
+import { AnimState, CharacterParts, animateCharacter, createCharacter, toon } from "./character";
 import { InputManager, Bindings, DEFAULT_BINDINGS } from "./input";
 import { AudioEngine } from "./audio";
 import { WATER_LEVEL, buildTerrain, biomeAt, heightAt, normalAt, POI } from "./terrain";
@@ -11,6 +11,32 @@ import { buildSky, buildWorld, Collider, WorldRefs } from "./world";
 import { Enemy, Npc, Pickup } from "./entities";
 import { ITENS, NPCS, QUESTS, RECEITAS, DialogoNo, NpcDef } from "./data";
 import { DEFAULT_SETTINGS, SaveData, Settings, loadGame, saveGame } from "./save";
+import { APARENCIA_PADRAO, AVATAR_PADRAO, Aparencia, AvatarConfig } from "./profile";
+import { aplicarAparencia as aplicarAparenciaCena } from "./appearance";
+
+export interface GameOptions {
+  avatar?: AvatarConfig;
+  aparencia?: Aparencia;
+}
+
+export interface RemotoInfo {
+  id: string;
+  nome: string;
+  x: number;
+  y: number;
+  z: number;
+  ang: number;
+  anim?: string;
+  avatar?: AvatarConfig;
+}
+
+interface Remoto {
+  partes: CharacterParts;
+  alvo: THREE.Vector3;
+  nome: string;
+  anim: AnimState;
+}
+
 
 export interface Slot {
   id: string;
