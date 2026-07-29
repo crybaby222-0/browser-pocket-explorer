@@ -74,6 +74,8 @@ export interface HudState {
   prompt: string | null;
   dialogo: DialogoAtivo | null;
   slots: Slot[];
+  hotbarSel: number;
+  jogadores: { nome: string; x: number; z: number }[];
   equipado: { arma: string | null; ferramenta: string | null };
   quests: QuestView[];
   destino: [number, number] | null;
@@ -636,6 +638,7 @@ export class Game {
       for (const n of this.npcs) n.update(0, t, this.pos);
     }
 
+    this.atualizarRemotos(dt);
     this.world.update(t, this.pos, this.settings.distancia);
     for (const p of this.pickups) p.update(t);
     this.updateFx(dt);
@@ -890,6 +893,12 @@ export class Game {
             }
           : null,
       slots: this.slots.map((s) => ({ ...s })),
+      hotbarSel: this.hotbarSel,
+      jogadores: [...this.remotos.values()].map((r) => ({
+        nome: r.nome,
+        x: r.partes.root.position.x,
+        z: r.partes.root.position.z,
+      })),
       equipado: { ...this.equipado },
       quests: Object.entries(this.quests).map(([id, v]) => {
         const q = QUESTS[id];
