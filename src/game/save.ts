@@ -42,7 +42,11 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const DB_NAME = "lite-open-world";
 const STORE = "saves";
-const KEY = "slot-1";
+let KEY = "slot-1";
+/** Define qual mundo/slot está em uso (um save por mundo criado) */
+export function setSaveSlot(id: string) {
+  KEY = `slot-${id}`;
+}
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -69,7 +73,7 @@ export async function saveGame(data: SaveData): Promise<void> {
   } catch {
     // Fallback silencioso quando IndexedDB não está disponível (modo privado)
     try {
-      localStorage.setItem("lite-save", JSON.stringify(data));
+      localStorage.setItem(`lite-save-${KEY}`, JSON.stringify(data));
     } catch {
       /* sem persistência */
     }
@@ -88,7 +92,7 @@ export async function loadGame(): Promise<SaveData | null> {
     db.close();
     return data;
   } catch {
-    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("lite-save") : null;
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(`lite-save-${KEY}`) : null;
     return raw ? (JSON.parse(raw) as SaveData) : null;
   }
 }
@@ -103,7 +107,7 @@ export async function clearSave(): Promise<void> {
     /* ignore */
   }
   try {
-    localStorage.removeItem("lite-save");
+    localStorage.removeItem(`lite-save-${KEY}`);
   } catch {
     /* ignore */
   }
