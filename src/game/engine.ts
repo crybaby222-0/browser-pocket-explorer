@@ -129,8 +129,20 @@ export class Game {
 
   onState: (s: HudState) => void = () => {};
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, opts: GameOptions = {}) {
     this.container = container;
+    this.aparencia = opts.aparencia ?? { ...APARENCIA_PADRAO };
+    const av = opts.avatar ?? AVATAR_PADRAO;
+    this.player = createCharacter({
+      skin: av.pele,
+      shirt: av.camisa,
+      pants: av.calca,
+      hair: av.corCabelo,
+      hairStyle: av.cabelo,
+      hat: av.chapeu,
+      glasses: av.oculos,
+      scale: av.altura,
+    });
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -139,7 +151,8 @@ export class Game {
     container.appendChild(this.renderer.domElement);
 
     this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 600);
-    this.scene.fog = new THREE.Fog(0xbfeaff, 90, 260);
+    this.fogPadrao = new THREE.Fog(0xbfeaff, 90, 260);
+    this.scene.fog = this.fogPadrao;
     this.scene.background = new THREE.Color(0xa8e6ff);
 
     this.input = new InputManager(
@@ -149,6 +162,7 @@ export class Game {
     );
 
     this.buildScene();
+    this.aplicarAparencia(this.aparencia);
     window.addEventListener("resize", this.resize);
     void this.carregar();
     this.loop();
@@ -156,6 +170,66 @@ export class Game {
 
   onEscape: () => void = () => {};
   onHotkey: (code: string) => void = () => {};
+
+  /* --------------------- Aparência / texturas -------------------- */
+  aplicarAparencia(ap: Aparencia) {
+    this.aparencia = ap;
+    aplicarAparencia(ap, this.scene, this.renderer, this.fogPadrao);
+  }
+
+  /** Seleciona um slot da hotbar (estilo Minecraft) */
+  selecionarHotbar(i: number) {
+    this.hotbarSel = Math.max(0, Math.min(8, i));
+    this.emit();
+  }
+
+  /* ------------------------ Multiplayer ------------------------- */
+  /** Posição/estado do jogador local, enviado para os outros jogadores */
+  estadoRede() {
+    return { x: this.pos.x, y: this.pos.y, z: this.pos.z, ang: this.player.root.rotation.y, anim: this.anim };
+  }
+
+  /** Sincroniza os avatares dos jogadores remotos */
+  sincronizarRemotos(lista: RemotoInfo[]) {
+    const vistos = new Set<string>();
+    for (const r of lista) {
+      vistos.add(r.id);
+      let rem = this.remotos.get(r.id);
+      if (!rem) {
+        const partes = createCharacter({
+          skin: r.avatar?.pele,
+          shirt: r.avatar?.camisa,
+          pants: r.avatar?.calca,
+          hair: r.avatar?.corCabelo,
+          hairStyle: r.avatar?.cabelo,
+          hat: r.avatar?.chapeu,
+          glasses: r.avatar?.oculos,
+          scale: r.avatar?.altura ?? 1,
+        });
+        this.scene.add(partes.root);
+        rem = { partes, alvo: new THREE.Vector3(r.x, r.y, r.z), nome: r.nome, anim: "idle" };
+        this.remotos.set(r.id, rem);
+      }
+      rem.alvo.set(r.x, r.y, r.z);
+      rem.nome = r.nome;
+      rem.anim = (r.anim as AnimState) ?? "idle";
+      rem.partes.root.rotation.y = r.ang;
+    }
+    for (const [id, rem] of this.remotos) {
+      if (!vistos.has(id)) {
+        this.scene.remove(rem.partes.root);
+        this.remotos.delete(id);
+      }
+    }
+  }
+
+  private atualizarRemotos(dt: number) {
+    for (const rem of this.remotos.values()) {
+      rem.partes.root.position.lerp(rem.alvo, Math.min(1, dt * 8));
+      animateCharacter(rem.partes, rem.anim, this.clock.elapsedTime, dt);
+    }
+  }
+
 
   /* ------------------------- Construção ------------------------- */
   private buildScene() {
