@@ -21,8 +21,11 @@ export interface CharacterOptions {
   shirt?: string;
   pants?: string;
   hair?: string;
+  /** Estilo do cabelo: curto | longo | topete | coque | careca */
+  hairStyle?: string;
   scale?: number;
   hat?: boolean;
+  glasses?: boolean;
 }
 
 let gradient: THREE.DataTexture | null = null;
