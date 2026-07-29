@@ -4,7 +4,7 @@
  * Usa InstancedMesh + LOD por distância para manter FPS alto no mobile.
  */
 import * as THREE from "three";
-import { PALETTE, POI, WATER_LEVEL, WORLD_SIZE, biomeAt, heightAt, normalAt } from "./terrain";
+import { PALETTE, POI, WATER_LEVEL, WORLD_CFG, WORLD_SIZE, biomeAt, heightAt, normalAt } from "./terrain";
 import { toon } from "./character";
 
 export interface Collider {
@@ -84,7 +84,7 @@ export function buildWorld(scene: THREE.Scene): WorldRefs {
   const lodTargets: { mesh: THREE.Object3D; dist: number }[] = [];
 
   /* ---------- Árvores frondosas (floresta / campo) ---------- */
-  const treeSpots = place(320, 7, (x, z, h) => {
+  const treeSpots = place(Math.round(320 * WORLD_CFG.floresta), 7, (x, z, h) => {
     const b = biomeAt(x, z);
     return h > WATER_LEVEL + 1.2 && h < 19 && (b === "floresta" || (b === "campo" && Math.random() > 0.65));
   });
@@ -118,7 +118,7 @@ export function buildWorld(scene: THREE.Scene): WorldRefs {
   group.add(trunks, leaves);
 
   /* ---------- Pinheiros nas montanhas ---------- */
-  const pineSpots = place(180, 21, (_x, _z, h) => h > 14 && h < 30);
+  const pineSpots = place(Math.round(180 * WORLD_CFG.floresta), 21, (_x, _z, h) => h > 14 && h < 30);
   const pineMat = toon("#2f9d64").clone();
   windify(pineMat, 0.02, grassMats);
   const pines = new THREE.InstancedMesh(pineGeo, pineMat, pineSpots.length * 2);
@@ -157,7 +157,7 @@ export function buildWorld(scene: THREE.Scene): WorldRefs {
 
   /* ---------- Campos floridos ---------- */
   const flowerColors = ["#ff5f9e", "#ffd93d", "#7ad7ff", "#ff8b3d", "#c77dff"];
-  const flowerSpots = place(900, 91, (x, z, h) => h > WATER_LEVEL + 0.8 && h < 13 && Math.hypot(x - POI.campo.x, z - POI.campo.y) < 95);
+  const flowerSpots = place(Math.round(900 * WORLD_CFG.floresta), 91, (x, z, h) => h > WATER_LEVEL + 0.8 && h < 13 && Math.hypot(x - POI.campo.x, z - POI.campo.y) < 95);
   const petalMat = toon("#ffffff").clone();
   windify(petalMat, 0.16, grassMats);
   const flowers = new THREE.InstancedMesh(petalGeo, petalMat, flowerSpots.length);
