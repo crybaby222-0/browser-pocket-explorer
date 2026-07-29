@@ -8,6 +8,11 @@ import { TouchControls } from "./TouchControls";
 import { Dialogo } from "./Dialogo";
 import { Inventario } from "./Inventario";
 import { ConfigPanel, MapaPanel, MissoesPanel, PausaPanel } from "./Paineis";
+import { Hotbar } from "./Hotbar";
+import { MenuInicial, type Inicio } from "./MenuInicial";
+import { setSaveSlot } from "@/game/save";
+import { setWorldConfig } from "@/game/terrain";
+import { Multiplayer } from "@/game/multiplayer";
 
 type Painel = null | "inv" | "mapa" | "quests" | "config" | "pausa";
 
@@ -17,13 +22,21 @@ export function GameShell() {
   const [state, setState] = useState<HudState | null>(null);
   const [painel, setPainel] = useState<Painel>(null);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
-  const [iniciado, setIniciado] = useState(false);
+  const [inicio, setInicio] = useState<Inicio | null>(null);
+  const mpRef = useRef<Multiplayer | null>(null);
   const painelRef = useRef<Painel>(null);
   painelRef.current = painel;
 
   useEffect(() => {
-    if (!boxRef.current) return;
-    const g = new Game(boxRef.current);
+    if (!boxRef.current || !inicio) return;
+    setWorldConfig({
+      seed: inicio.mundo.seed,
+      montanhas: inicio.mundo.montanhas,
+      floresta: inicio.mundo.floresta,
+      agua: inicio.mundo.agua,
+    });
+    setSaveSlot(inicio.mundo.id);
+    const g = new Game(boxRef.current, { avatar: inicio.perfil.avatar, aparencia: inicio.aparencia });
     gameRef.current = g;
     g.onState = setState;
     g.onEscape = () => setPainel((p) => (p ? null : "pausa"));
@@ -32,8 +45,24 @@ export function GameShell() {
       const alvo = map[code];
       if (alvo) setPainel((p) => (p === alvo ? null : alvo));
     };
-    return () => g.dispose();
-  }, []);
+    g.audio.start();
+
+    let mpTimer = 0;
+    if (inicio.multiplayer) {
+      const mp = new Multiplayer(`${inicio.mundo.nome}-${inicio.mundo.seed}`, inicio.perfil.nome, inicio.perfil.avatar);
+      mpRef.current = mp;
+      mp.onJogadores = (lista) => g.sincronizarRemotos(lista);
+      void mp.conectar();
+      mpTimer = window.setInterval(() => mp.enviar(g.estadoRede()), 120);
+    }
+
+    return () => {
+      clearInterval(mpTimer);
+      void mpRef.current?.desconectar();
+      mpRef.current = null;
+      g.dispose();
+    };
+  }, [inicio]);
 
   // Pausa a simulação sempre que um painel está aberto
   useEffect(() => {
@@ -44,12 +73,6 @@ export function GameShell() {
     setSettings(s);
     gameRef.current?.aplicarSettings(s);
   }, []);
-
-  const iniciar = () => {
-    setIniciado(true);
-    gameRef.current?.audio.start();
-    gameRef.current?.aplicarSettings(settings);
-  };
 
   const onMove = useCallback((x: number, y: number) => {
     const t = gameRef.current?.input.touch;
@@ -85,6 +108,15 @@ export function GameShell() {
       />
 
       {state && <Hud s={state} mostrarFps={settings.mostrarFps} />}
+
+      {state && g && (
+        <Hotbar
+          slots={state.slots}
+          sel={state.hotbarSel}
+          onSelecionar={(i) => g.selecionarHotbar(i)}
+          onUsar={(i) => g.usarSlot(i)}
+        />
+      )}
 
       {/* Botões de menu (funcionam em toque e desktop) */}
       <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 sm:left-auto sm:right-3 sm:translate-x-0">
@@ -150,29 +182,16 @@ export function GameShell() {
         </div>
       )}
 
-      {!iniciado && (
-        <div className="absolute inset-0 z-50 grid place-items-center bg-foreground/55 p-4 backdrop-blur-md">
-          <div className="painel-pop max-w-sm p-6 text-center">
-            <h1 className="fonte-display text-4xl font-black tracking-tight">LITE</h1>
-            <p className="mt-1 text-sm font-semibold uppercase tracking-[0.25em] opacity-80">Mundo Aberto</p>
-            <p className="mt-4 text-sm leading-relaxed opacity-90">
-              Explore florestas, vilas, lagos, montanhas, cavernas, ruínas e praias em um mundo contínuo. Faça missões,
-              crie itens e enfrente o Rei Geleia.
-            </p>
-            <button
-              onClick={iniciar}
-              className="mt-5 w-full rounded-xl border-2 border-hud-border bg-hud-foreground/20 px-4 py-3 text-lg font-bold active:scale-95"
-            >
-              Começar aventura
-            </button>
-            <p className="mt-3 text-[11px] opacity-70">
-              Desktop: WASD, mouse e gamepad. Celular: joystick e botões na tela.
-            </p>
-          </div>
-        </div>
-      )}
+      {!inicio && <MenuInicial onJogar={setInicio} />}
 
-      <TouchControls onMove={onMove} onButton={onButton} onRun={onRun} onLook={onLook} />
+      <TouchControls
+        onMove={onMove}
+        onButton={onButton}
+        onRun={onRun}
+        onLook={onLook}
+        layout={inicio?.joystick ?? "vertical"}
+        sempreVisivel={inicio?.joystick === "horizontal"}
+      />
     </div>
   );
 }

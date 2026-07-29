@@ -21,8 +21,11 @@ export interface CharacterOptions {
   shirt?: string;
   pants?: string;
   hair?: string;
+  /** Estilo do cabelo: curto | longo | topete | coque | careca */
+  hairStyle?: string;
   scale?: number;
   hat?: boolean;
+  glasses?: boolean;
 }
 
 let gradient: THREE.DataTexture | null = null;
@@ -45,6 +48,10 @@ export function toon(color: string): THREE.MeshToonMaterial {
     matCache.set(color, m);
   }
   return m;
+}
+/** Todos os materiais toon criados (usado pelos pacotes de textura) */
+export function toonMaterials(): THREE.MeshToonMaterial[] {
+  return [...matCache.values()];
 }
 
 const outlineMat = new THREE.MeshBasicMaterial({ color: 0x2a2140, side: THREE.BackSide });
@@ -70,8 +77,10 @@ export function createCharacter(opts: CharacterOptions = {}): CharacterParts {
     shirt = "#ff5f7e",
     pants = "#4b7bec",
     hair = "#5b3a29",
+    hairStyle = "curto",
     scale = 1,
     hat = false,
+    glasses = false,
   } = opts;
 
   const root = new THREE.Group();
@@ -92,10 +101,43 @@ export function createCharacter(opts: CharacterOptions = {}): CharacterParts {
   skull.castShadow = true;
   head.add(withOutline(skull, 1.03));
 
-  const hairMesh = new THREE.Mesh(sphere, toon(hair));
-  hairMesh.scale.set(0.478, 0.43, 0.478);
-  hairMesh.position.y = 0.12;
-  head.add(hairMesh);
+  // Cabelo com estilos alternativos (editor de avatar)
+  if (hairStyle !== "careca") {
+    const hairMesh = new THREE.Mesh(sphere, toon(hair));
+    hairMesh.scale.set(0.478, hairStyle === "topete" ? 0.5 : 0.43, 0.478);
+    hairMesh.position.y = hairStyle === "topete" ? 0.15 : 0.12;
+    head.add(hairMesh);
+    if (hairStyle === "longo") {
+      const mecha = new THREE.Mesh(sphere, toon(hair));
+      mecha.scale.set(0.44, 0.5, 0.34);
+      mecha.position.set(0, -0.18, -0.14);
+      head.add(mecha);
+    }
+    if (hairStyle === "coque") {
+      const coque = new THREE.Mesh(sphere, toon(hair));
+      coque.scale.setScalar(0.22);
+      coque.position.set(0, 0.5, -0.1);
+      head.add(coque);
+    }
+    if (hairStyle === "topete") {
+      const topete = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.3, 8), toon(hair));
+      topete.position.set(0, 0.52, 0.06);
+      topete.rotation.x = -0.4;
+      head.add(topete);
+    }
+  }
+
+  if (glasses) {
+    for (const s of [-1, 1]) {
+      const lente = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.022, 6, 12), toon("#2a2140"));
+      lente.position.set(0.17 * s, 0.02, 0.42);
+      head.add(lente);
+    }
+    const ponte = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.02, 0.02), toon("#2a2140"));
+    ponte.position.set(0, 0.02, 0.42);
+    head.add(ponte);
+  }
+
 
   const eyeGeo = new THREE.SphereGeometry(0.075, 10, 8);
   const eyeMat = new THREE.MeshBasicMaterial({ color: 0x2a2140 });

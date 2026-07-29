@@ -3,7 +3,7 @@
  * missões, inventário, save automático e ponte reativa com a interface.
  */
 import * as THREE from "three";
-import { AnimState, animateCharacter, createCharacter, toon } from "./character";
+import { AnimState, CharacterParts, animateCharacter, createCharacter, toon } from "./character";
 import { InputManager, Bindings, DEFAULT_BINDINGS } from "./input";
 import { AudioEngine } from "./audio";
 import { WATER_LEVEL, buildTerrain, biomeAt, heightAt, normalAt, POI } from "./terrain";
@@ -11,6 +11,32 @@ import { buildSky, buildWorld, Collider, WorldRefs } from "./world";
 import { Enemy, Npc, Pickup } from "./entities";
 import { ITENS, NPCS, QUESTS, RECEITAS, DialogoNo, NpcDef } from "./data";
 import { DEFAULT_SETTINGS, SaveData, Settings, loadGame, saveGame } from "./save";
+import { APARENCIA_PADRAO, AVATAR_PADRAO, Aparencia, AvatarConfig } from "./profile";
+import { aplicarAparencia as aplicarAparenciaCena } from "./appearance";
+
+export interface GameOptions {
+  avatar?: AvatarConfig;
+  aparencia?: Aparencia;
+}
+
+export interface RemotoInfo {
+  id: string;
+  nome: string;
+  x: number;
+  y: number;
+  z: number;
+  ang: number;
+  anim?: string;
+  avatar?: AvatarConfig;
+}
+
+interface Remoto {
+  partes: CharacterParts;
+  alvo: THREE.Vector3;
+  nome: string;
+  anim: AnimState;
+}
+
 
 export interface Slot {
   id: string;
@@ -48,6 +74,8 @@ export interface HudState {
   prompt: string | null;
   dialogo: DialogoAtivo | null;
   slots: Slot[];
+  hotbarSel: number;
+  jogadores: { nome: string; x: number; z: number }[];
   equipado: { arma: string | null; ferramenta: string | null };
   quests: QuestView[];
   destino: [number, number] | null;
@@ -77,9 +105,13 @@ export class Game {
   private colliders: Collider[] = [];
   private sun!: THREE.DirectionalLight;
   private sky!: THREE.Mesh;
+  private fogPadrao: THREE.Fog;
+  aparencia: Aparencia;
+  hotbarSel = 0;
+  private remotos = new Map<string, Remoto>();
 
   // Jogador
-  private player = createCharacter({ shirt: "#ff5f7e", pants: "#4b7bec", hair: "#5b3a29", skin: "#ffd7b0" });
+  private player: CharacterParts;
   private pos = new THREE.Vector3(6, 0, -4);
   private vel = new THREE.Vector3();
   private noChao = true;
@@ -129,8 +161,20 @@ export class Game {
 
   onState: (s: HudState) => void = () => {};
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, opts: GameOptions = {}) {
     this.container = container;
+    this.aparencia = opts.aparencia ?? { ...APARENCIA_PADRAO };
+    const av = opts.avatar ?? AVATAR_PADRAO;
+    this.player = createCharacter({
+      skin: av.pele,
+      shirt: av.camisa,
+      pants: av.calca,
+      hair: av.corCabelo,
+      hairStyle: av.cabelo,
+      hat: av.chapeu,
+      glasses: av.oculos,
+      scale: av.altura,
+    });
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -139,7 +183,8 @@ export class Game {
     container.appendChild(this.renderer.domElement);
 
     this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 600);
-    this.scene.fog = new THREE.Fog(0xbfeaff, 90, 260);
+    this.fogPadrao = new THREE.Fog(0xbfeaff, 90, 260);
+    this.scene.fog = this.fogPadrao;
     this.scene.background = new THREE.Color(0xa8e6ff);
 
     this.input = new InputManager(
@@ -149,6 +194,7 @@ export class Game {
     );
 
     this.buildScene();
+    this.aplicarAparencia(this.aparencia);
     window.addEventListener("resize", this.resize);
     void this.carregar();
     this.loop();
@@ -156,6 +202,66 @@ export class Game {
 
   onEscape: () => void = () => {};
   onHotkey: (code: string) => void = () => {};
+
+  /* --------------------- Aparência / texturas -------------------- */
+  aplicarAparencia(ap: Aparencia) {
+    this.aparencia = ap;
+    aplicarAparenciaCena(ap, this.scene, this.renderer, this.fogPadrao);
+  }
+
+  /** Seleciona um slot da hotbar (estilo Minecraft) */
+  selecionarHotbar(i: number) {
+    this.hotbarSel = Math.max(0, Math.min(8, i));
+    this.emit();
+  }
+
+  /* ------------------------ Multiplayer ------------------------- */
+  /** Posição/estado do jogador local, enviado para os outros jogadores */
+  estadoRede() {
+    return { x: this.pos.x, y: this.pos.y, z: this.pos.z, ang: this.player.root.rotation.y, anim: this.anim };
+  }
+
+  /** Sincroniza os avatares dos jogadores remotos */
+  sincronizarRemotos(lista: RemotoInfo[]) {
+    const vistos = new Set<string>();
+    for (const r of lista) {
+      vistos.add(r.id);
+      let rem = this.remotos.get(r.id);
+      if (!rem) {
+        const partes = createCharacter({
+          skin: r.avatar?.pele,
+          shirt: r.avatar?.camisa,
+          pants: r.avatar?.calca,
+          hair: r.avatar?.corCabelo,
+          hairStyle: r.avatar?.cabelo,
+          hat: r.avatar?.chapeu,
+          glasses: r.avatar?.oculos,
+          scale: r.avatar?.altura ?? 1,
+        });
+        this.scene.add(partes.root);
+        rem = { partes, alvo: new THREE.Vector3(r.x, r.y, r.z), nome: r.nome, anim: "idle" };
+        this.remotos.set(r.id, rem);
+      }
+      rem.alvo.set(r.x, r.y, r.z);
+      rem.nome = r.nome;
+      rem.anim = (r.anim as AnimState) ?? "idle";
+      rem.partes.root.rotation.y = r.ang;
+    }
+    for (const [id, rem] of this.remotos) {
+      if (!vistos.has(id)) {
+        this.scene.remove(rem.partes.root);
+        this.remotos.delete(id);
+      }
+    }
+  }
+
+  private atualizarRemotos(dt: number) {
+    for (const rem of this.remotos.values()) {
+      rem.partes.root.position.lerp(rem.alvo, Math.min(1, dt * 8));
+      animateCharacter(rem.partes, rem.anim, this.clock.elapsedTime, dt);
+    }
+  }
+
 
   /* ------------------------- Construção ------------------------- */
   private buildScene() {
@@ -532,6 +638,7 @@ export class Game {
       for (const n of this.npcs) n.update(0, t, this.pos);
     }
 
+    this.atualizarRemotos(dt);
     this.world.update(t, this.pos, this.settings.distancia);
     for (const p of this.pickups) p.update(t);
     this.updateFx(dt);
@@ -786,6 +893,12 @@ export class Game {
             }
           : null,
       slots: this.slots.map((s) => ({ ...s })),
+      hotbarSel: this.hotbarSel,
+      jogadores: [...this.remotos.values()].map((r) => ({
+        nome: r.nome,
+        x: r.partes.root.position.x,
+        z: r.partes.root.position.z,
+      })),
       equipado: { ...this.equipado },
       quests: Object.entries(this.quests).map(([id, v]) => {
         const q = QUESTS[id];

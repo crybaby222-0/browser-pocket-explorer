@@ -7,9 +7,14 @@ interface Props {
   onButton: (b: "jump" | "attack" | "interact", pressed: boolean) => void;
   onRun: (v: boolean) => void;
   onLook: (dx: number, dy: number) => void;
+  /** "vertical" = joystick à esquerda | "horizontal" = barra de controles em modo paisagem */
+  layout?: "vertical" | "horizontal";
+  /** Mostrar controles também em telas grandes */
+  sempreVisivel?: boolean;
 }
 
-export function TouchControls({ onMove, onButton, onRun, onLook }: Props) {
+export function TouchControls({ onMove, onButton, onRun, onLook, layout = "vertical", sempreVisivel = false }: Props) {
+  const horiz = layout === "horizontal";
   const zona = useRef<HTMLDivElement>(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const idRef = useRef<number | null>(null);
@@ -144,11 +149,13 @@ export function TouchControls({ onMove, onButton, onRun, onLook }: Props) {
   };
 
   return (
-    <div className="pointer-events-none absolute inset-0 sm:hidden">
+    <div className={`pointer-events-none absolute inset-0 ${sempreVisivel ? "" : "sm:hidden"}`}>
       {/* Joystick */}
       <div
         ref={zona}
-        className="pointer-events-auto absolute bottom-10 left-6 size-32 rounded-full border-2 border-hud-border bg-hud-foreground/10 backdrop-blur-md"
+        className={`pointer-events-auto absolute rounded-full border-2 border-hud-border bg-hud-foreground/10 backdrop-blur-md ${
+          horiz ? "bottom-4 left-4 size-24" : "bottom-10 left-6 size-32"
+        }`}
         style={{ touchAction: "none" }}
       >
         <div
@@ -158,17 +165,21 @@ export function TouchControls({ onMove, onButton, onRun, onLook }: Props) {
       </div>
 
       {/* Botões de ação */}
-      <div className="pointer-events-auto absolute bottom-8 right-6 grid grid-cols-2 gap-3">
-        <Botao id="correr" label="Correr" className="size-14 self-end" toggle onPress={onRun}>
+      <div
+        className={`pointer-events-auto absolute ${
+          horiz ? "bottom-4 right-4 flex flex-row items-center gap-2" : "bottom-8 right-6 grid grid-cols-2 gap-3"
+        }`}
+      >
+        <Botao id="correr" label="Correr" className={horiz ? "size-12" : "size-14 self-end"} toggle onPress={onRun}>
           <Footprints className="size-6" />
         </Botao>
-        <Botao id="pular" label="Pular" className="size-16" onPress={(v) => onButton("jump", v)}>
+        <Botao id="pular" label="Pular" className={horiz ? "size-14" : "size-16"} onPress={(v) => onButton("jump", v)}>
           <ChevronsUp className="size-7" />
         </Botao>
-        <Botao id="interagir" label="Interagir" className="size-14" onPress={(v) => onButton("interact", v)}>
+        <Botao id="interagir" label="Interagir" className={horiz ? "size-12" : "size-14"} onPress={(v) => onButton("interact", v)}>
           <Hand className="size-6" />
         </Botao>
-        <Botao id="atacar" label="Atacar" className="size-16" onPress={(v) => onButton("attack", v)}>
+        <Botao id="atacar" label="Atacar" className={horiz ? "size-14" : "size-16"} onPress={(v) => onButton("attack", v)}>
           <Sword className="size-7" />
         </Botao>
       </div>

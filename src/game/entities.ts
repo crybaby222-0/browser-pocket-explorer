@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { AnimState, animateCharacter, createCharacter, toon, CharacterParts } from "./character";
 import { NpcDef } from "./data";
+import { modeloDoItem } from "./models";
 import { WATER_LEVEL, heightAt } from "./terrain";
 
 /* ------------------------------ NPCs ------------------------------ */
@@ -211,13 +212,13 @@ export class Pickup {
     this.id = id;
     this.qtd = qtd;
     this.root = new THREE.Group();
-    const geo = id === "lanterna" ? new THREE.OctahedronGeometry(0.42) : new THREE.IcosahedronGeometry(0.32, 0);
-    const m = new THREE.Mesh(geo, toon(cor));
-    m.castShadow = true;
-    this.root.add(m);
+    const variacao = Math.abs(Math.round(x * 3 + z * 7));
+    const modelo = modeloDoItem(id, cor, variacao);
+    modelo.position.y = -0.25;
+    this.root.add(modelo);
     const halo = new THREE.Mesh(
       new THREE.SphereGeometry(0.62, 10, 8),
-      new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0.22 }),
+      new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0.18 }),
     );
     this.root.add(halo);
     const base = y ?? Math.max(heightAt(x, z), WATER_LEVEL);
