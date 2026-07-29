@@ -49,6 +49,10 @@ export function toon(color: string): THREE.MeshToonMaterial {
   }
   return m;
 }
+/** Todos os materiais toon criados (usado pelos pacotes de textura) */
+export function toonMaterials(): THREE.MeshToonMaterial[] {
+  return [...matCache.values()];
+}
 
 const outlineMat = new THREE.MeshBasicMaterial({ color: 0x2a2140, side: THREE.BackSide });
 
