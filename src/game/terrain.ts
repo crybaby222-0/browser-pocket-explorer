@@ -86,9 +86,9 @@ export function heightAt(x: number, z: number): number {
 
   // Cadeia de montanhas ao norte
   const dm = Math.hypot(x - POI.montanha.x, z - POI.montanha.y);
-  h += Math.pow(falloff(dm, 85), 2.1) * 46;
+  h += Math.pow(falloff(dm, 85), 2.1) * 46 * WORLD_CFG.montanhas;
   const dm2 = Math.hypot(x + 30, z + 110);
-  h += Math.pow(falloff(dm2, 60), 2.2) * 30;
+  h += Math.pow(falloff(dm2, 60), 2.2) * 30 * WORLD_CFG.montanhas;
 
   // Bacia do lago
   const dl = Math.hypot(x - POI.lago.x, z - POI.lago.y);
@@ -122,7 +122,7 @@ export function heightAt(x: number, z: number): number {
   const edge = Math.max(Math.abs(x), Math.abs(z));
   h = THREE.MathUtils.lerp(h, -10, THREE.MathUtils.smoothstep(edge, WORLD_SIZE / 2 - 40, WORLD_SIZE / 2));
 
-  return h;
+  return h - WORLD_CFG.agua;
 }
 
 function flattenPath(h: number, x: number, z: number, a: THREE.Vector2, b: THREE.Vector2, w: number) {
@@ -143,7 +143,7 @@ function flattenPath(h: number, x: number, z: number, a: THREE.Vector2, b: THREE
 function heightRaw(x: number, z: number): number {
   let h = fbm(x * 0.012 + 10, z * 0.012 - 4, 4) * 9 - 1.5;
   const dm = Math.hypot(x - POI.montanha.x, z - POI.montanha.y);
-  h += Math.pow(falloff(dm, 85), 2.1) * 46;
+  h += Math.pow(falloff(dm, 85), 2.1) * 46 * WORLD_CFG.montanhas;
   const dl = Math.hypot(x - POI.lago.x, z - POI.lago.y);
   h -= Math.pow(falloff(dl, 42), 1.4) * 12;
   const dv = Math.hypot(x - POI.vila.x, z - POI.vila.y);
